@@ -1,0 +1,10 @@
+Bundle-Name: csv-template-mailer-portlet
+Bundle-SymbolicName: com.rivetlogic.csvtemplatemailer
+Bundle-Version: 1.0.0
+Export-Package: \
+	com.rivetlogic.csvtemplatemailer.portlet,\
+	com.rivetlogic.csvtemplatemailer.util
+	
+Include-Resource:\
+	@opencsv-3.9.jar,\
+	@commons-lang3-3.5.jar,\
