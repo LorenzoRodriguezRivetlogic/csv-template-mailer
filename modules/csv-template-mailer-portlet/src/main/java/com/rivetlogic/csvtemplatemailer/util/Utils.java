@@ -2,6 +2,9 @@ package com.rivetlogic.csvtemplatemailer.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONException;
@@ -9,6 +12,8 @@ import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 
 public class Utils {
+	public static String DEFAULT_COLUMN_NAME = "Column";
+	
 	public static String formatColumnName(String columnName) {
 		columnName = columnName.toLowerCase();
 		columnName = columnName.replace(" ", "_");
@@ -17,12 +22,19 @@ public class Utils {
 	}
 	
 	public static String generateHtmlTable(List<FileColumn> columns) {
+		int countCol = 1;
+		
 		String tableStart = "<table border=\"1\" cellpadding=\"1\" cellspacing=\"1\" style=\"width:500px;\">"+
 								"<tbody>"+
 									"<tr>";
 		String columnsName = "";
 		for (FileColumn fileColumn : columns) {
-			columnsName += "<td>"+ fileColumn.getName() +"</td>";
+			if (!fileColumn.getName().equals("")){
+				columnsName += "<td>"+ fileColumn.getName() +"</td>";
+			} else {
+				columnsName += "<td>"+ DEFAULT_COLUMN_NAME + countCol +"</td>";
+			}
+			
 		}
 		
 		String rowChange = "</tr><tr>";
@@ -71,5 +83,40 @@ public class Utils {
 		}
 		
 		return result;
+	}
+	
+	public static String replaceDataFirstRow(String fileId, List<FileColumn> params, FileColumn email, String template) {
+		Map<String, String> firstRow = FileUtil.getFirstDataRow(fileId, params, email);
+		String result = template;
+		for (Map.Entry<String, String> entry : firstRow.entrySet()) {
+		    String key = entry.getKey();
+		    String value = entry.getValue();
+		    
+		    if (key.equals(WebKeys.EMAIL_TO_SEND)) {
+		    	continue;
+		    }
+		    
+		    result = result.replace(key, value);
+		}
+		
+		
+		return removeUnwantedColumns(result);
+	}
+	
+	public static String removeUnwantedColumns(String data) {
+		Pattern pattern = Pattern.compile("(\\$\\{)(.*?)(\\})");
+		Matcher matcher = pattern.matcher(data);
+		
+		List<String> listMatches = new ArrayList<String>();
+
+        while(matcher.find()) {
+            listMatches.add(matcher.group(0));
+        }
+
+        for(String s : listMatches) {
+        	data = data.replace(s, "");
+        }
+		
+		return data;
 	}
 }

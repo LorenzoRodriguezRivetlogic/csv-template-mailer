@@ -125,14 +125,16 @@
 <aui:script>
 Liferay.on('portletReady',function(event) {    
 	if('_' + event.portletId + '_' == '<portlet:namespace/>'){
-		CKEDITOR.instances.editor1.setData('<%= bckTemplate %>');
+		var elementExistsBol = !!document.getElementById("editor1");
+		if (elementExistsBol) {
+			console.log('Setting data' + '<%= bckTemplate %>');
+			CKEDITOR.instances.editor1.setData('<%= bckTemplate %>');
+		}
 	}
 });   
 function submitToPreview() {
 	var template = CKEDITOR.instances.editor1.getData();
 	document.getElementById("<portlet:namespace />content").value = template;
-
-	submitForm(document.<portlet:namespace />fm);
 }
 
 function callServeResource(){

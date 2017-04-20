@@ -129,6 +129,7 @@ public class FileUtil {
 	}
 	
 	public static List<FileColumn> getFileColumns (final String fileId) {
+		int countCol = 1;
 		Long fileIdLong = Long.parseLong(fileId);
 		List<FileColumn>  columns = new ArrayList<FileColumn>();
 		
@@ -143,7 +144,13 @@ public class FileUtil {
 			for (int i = 0; i < columnsRaw.length; i++) {
 				FileColumn column = new FileColumn();
 				column.setId(i);
-				column.setName(columnsRaw[i]);
+				if (!columnsRaw[i].equals("")) {
+					column.setName(columnsRaw[i]);
+				} else {
+					column.setName(Utils.DEFAULT_COLUMN_NAME+countCol);
+				}
+				
+				
 				
 				columns.add(column);
 			}

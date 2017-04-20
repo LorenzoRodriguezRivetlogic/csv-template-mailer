@@ -14,17 +14,7 @@
 	FileColumn email = (FileColumn) JSONFactoryUtil.looseDeserialize(emailString, FileColumn.class);
 	
 	Map<String, String> firstRow = FileUtil.getFirstDataRow(fileId, params, email);
-	String tempPreview = template;
-	for (Map.Entry<String, String> entry : firstRow.entrySet()) {
-	    String key = entry.getKey();
-	    String value = entry.getValue();
-	    
-	    if (key.equals(WebKeys.EMAIL_TO_SEND)) {
-	    	continue;
-	    }
-	    
-	    tempPreview = tempPreview.replace(key, value);
-	}
+	String tempPreview = Utils.replaceDataFirstRow(fileId, params, email, template);
 %>
 
 
