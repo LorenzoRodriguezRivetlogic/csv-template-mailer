@@ -1,11 +1,5 @@
 package com.rivetlogic.csvtemplatemailer.portlet;
 
-import com.liferay.mail.kernel.model.MailMessage;
-import com.liferay.petra.mail.MailEngine;
-import com.liferay.petra.mail.MailEngineException;
-import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatus;
-import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusRegistryUtil;
-import com.liferay.portal.kernel.backgroundtask.BackgroundTaskThreadLocal;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -27,7 +21,6 @@ import com.rivetlogic.csvtemplatemailer.service.TemplateLocalServiceUtil;
 import com.rivetlogic.csvtemplatemailer.task.SendEmailTask;
 import com.rivetlogic.csvtemplatemailer.util.FileColumn;
 import com.rivetlogic.csvtemplatemailer.util.FileUtil;
-import com.rivetlogic.csvtemplatemailer.util.MailUtil;
 import com.rivetlogic.csvtemplatemailer.util.Utils;
 import com.rivetlogic.csvtemplatemailer.util.WebKeys;
 
@@ -38,8 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.Portlet;
@@ -169,12 +160,7 @@ public class CsvTemplateMailerPortlet extends MVCPortlet {
 	}
 	
 	public void sendEmails(ActionRequest request, ActionResponse response) throws IOException {
-		String fileId = ParamUtil.getString(request, WebKeys.FILE_ID);
-		String emailColumn = ParamUtil.getString(request, WebKeys.COLUMN_EMAIL);
-		String columnsToUse = ParamUtil.getString(request, WebKeys.COLUMNS_TO_USE);
-	    String content = ParamUtil.getString(request, WebKeys.CONTENT);
-	    String senderEmail = ParamUtil.getString(request, WebKeys.SENDER_EMAIL);
-	    String emailSubject = ParamUtil.getString(request, WebKeys.EMAIL_SUBJECT);
+		
 	}
 
 	public void serveResource(ResourceRequest resourceRequest, ResourceResponse resourceResponse) 

@@ -3,12 +3,10 @@ package com.rivetlogic.csvtemplatemailer.task;
 import java.util.List;
 import java.util.Map;
 
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 import com.liferay.mail.kernel.model.MailMessage;
 import com.liferay.petra.mail.MailEngine;
-import com.liferay.petra.mail.MailEngineException;
 import com.rivetlogic.csvtemplatemailer.util.FileUtil;
 import com.rivetlogic.csvtemplatemailer.util.MailUtil;
 
