@@ -12,7 +12,7 @@ import com.rivetlogic.csvtemplatemailer.util.MailUtil;
 
 public class SendEmailTask implements Runnable {
 
-	private final Thread thread;
+	private Thread thread;
 	
 	private int sent = 0; 
 	private int notSent = 0; 
@@ -59,6 +59,11 @@ public class SendEmailTask implements Runnable {
         return thread.getState();
     }
 	
+	public void clean() {
+		sent = 0;
+		notSent = 0;
+		thread = new Thread(this);
+	}
 	public int getSent() {
 		return sent;
 	}

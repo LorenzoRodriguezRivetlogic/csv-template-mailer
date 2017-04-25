@@ -82,6 +82,12 @@
 </aui:form>  
 
 <aui:script>  
+
+var interval;
+document.getElementById('<portlet:namespace/>sent').innerHTML = 0;
+document.getElementById('<portlet:namespace/>not-sent').innerHTML = 0;
+document.getElementById('<portlet:namespace/>complete').style.display = 'none';
+	
 function callSendData(){
 	console.log("Method");
 	AUI().use('aui-base', function(A){
@@ -90,7 +96,7 @@ function callSendData(){
 	});
 	startCall();
 	ajaxCall();
-	self.setInterval(function(){ajaxCall();},1000);
+	interval = self.setInterval(function(){ajaxCall();},1000);
 }
 
 function ajaxCall(){
@@ -109,8 +115,10 @@ function ajaxCall(){
 			     	var finished = (result.finished === "true");
 					if (finished) {
 						document.getElementById('<portlet:namespace/>complete').style.display = 'inline';
+						clearInterval(interval);
+					} else {
+						document.getElementById('<portlet:namespace/>complete').style.display = 'none';
 					}
-					console.log(result);
 			    }
 			}
 		});

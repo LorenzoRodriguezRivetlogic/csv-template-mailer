@@ -346,6 +346,7 @@ public class CsvTemplateMailerPortlet extends MVCPortlet {
 			
 			if (emailTask.getState() == Thread.State.TERMINATED) {
 				data.put("finished", String.valueOf(true));
+				emailTask.clean();
 			} else {
 				data.put("finished", String.valueOf(false));
 			}
