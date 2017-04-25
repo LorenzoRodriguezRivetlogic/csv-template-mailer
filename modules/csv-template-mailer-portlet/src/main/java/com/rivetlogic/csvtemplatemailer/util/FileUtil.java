@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.liferay.document.library.kernel.exception.NoSuchFileVersionException;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppServiceUtil;
 import com.liferay.document.library.kernel.service.DLFileEntryLocalServiceUtil;
@@ -96,7 +97,7 @@ public class FileUtil {
 			DLAppServiceUtil.deleteFileEntry(fileEntry.getFileEntryId());
 			DLAppServiceUtil.deleteFolder(fileEntry.getFolderId());
 		} catch (PortalException e) {
-			LOG.error(e);
+			//LOG.error(e);
 		} catch (SystemException e) {
 			LOG.error(e);
 		}

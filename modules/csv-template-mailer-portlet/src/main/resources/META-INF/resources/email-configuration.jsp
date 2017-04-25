@@ -1,3 +1,4 @@
+<%@page import="com.rivetlogic.csvtemplatemailer.util.Utils"%>
 <%@ include file="/init.jsp" %>
 
 <%
@@ -127,11 +128,13 @@ Liferay.on('portletReady',function(event) {
 	if('_' + event.portletId + '_' == '<portlet:namespace/>'){
 		var elementExistsBol = !!document.getElementById("editor1");
 		if (elementExistsBol) {
-			console.log('Setting data' + '<%= bckTemplate %>');
-			CKEDITOR.instances.editor1.setData('<%= bckTemplate %>');
+			CKEDITOR.instances.editor1.setData('<%= bckTemplate %>', function() {
+		        this.checkDirty();
+		    });
 		}
 	}
 });   
+
 function submitToPreview() {
 	var template = CKEDITOR.instances.editor1.getData();
 	document.getElementById("<portlet:namespace />content").value = template;

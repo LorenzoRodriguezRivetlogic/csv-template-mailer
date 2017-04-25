@@ -17,6 +17,7 @@
 	String tempPreview = Utils.replaceDataFirstRow(fileId, params, email, template);
 %>
 
+<portlet:resourceURL var="resourceURL"/>
 
 <portlet:actionURL name="sendEmails" var="sendEmailsURL">
 	<portlet:param name="backURL" value="<%= currentURL %>"/>
@@ -55,6 +56,17 @@
 	<%= tempPreview %>
 </div>
 
+<br />
+
+<div id="<portlet:namespace/>status-box" style="padding: 10px; display: none">
+	<b></b><liferay-ui:message key="sending-emails" /></b>
+	<ul>
+		<li><liferay-ui:message key="emails-sent" />: <span id="<portlet:namespace/>sent">0</span></li>
+		<li><liferay-ui:message key="emails-no-sent" />: <span id="<portlet:namespace/>not-sent">0</span></li>
+	</ul>
+	<span id="<portlet:namespace/>complete" style="display: none"><liferay-ui:message key="mail-sending-completed" /></span>
+</div>
+
 <aui:form action="<%= sendEmailsURL %>" method="post" name="fm">
 	<aui:input name="fileId" value="<%= fileId %>" type="hidden" />
 	<aui:input name="emailColumn" value="<%= emailString %>" type="hidden" />
@@ -64,6 +76,76 @@
 	<aui:input name="emailSubject" value="<%= subject %>" type="hidden" />
 	
 	<aui:button-row>
-        <aui:button type="submit" value="send-button" />
+		<aui:button name="send-button" type="button" value="send-button" onClick="callSendData()" />
+        <aui:button type="submit" value="finish" />
     </aui:button-row>
-</aui:form>         
+</aui:form>  
+
+<aui:script>  
+function callSendData(){
+	console.log("Method");
+	AUI().use('aui-base', function(A){
+		A.one("#<portlet:namespace/>send-button").attr({'disabled' : true});
+		document.getElementById('<portlet:namespace/>status-box').style.display = 'inline';
+	});
+	startCall();
+	ajaxCall();
+	self.setInterval(function(){ajaxCall();},1000);
+}
+
+function ajaxCall(){
+	AUI().use('aui-base', function(A){
+		A.io.request('<%=resourceURL.toString()%>', {
+			method: 'post',
+			data: {
+				<portlet:namespace />action: 'status-send',
+			},
+			dataType: 'json',
+			on: {
+				success: function() {
+			     	var result = this.get('responseData');
+			     	document.getElementById('<portlet:namespace/>sent').innerHTML = result.sent;
+			     	document.getElementById('<portlet:namespace/>not-sent').innerHTML = result.notSent;
+			     	var finished = (result.finished === "true");
+					if (finished) {
+						document.getElementById('<portlet:namespace/>complete').style.display = 'inline';
+					}
+					console.log(result);
+			    }
+			}
+		});
+	});
+}
+
+function startCall(){
+	AUI().use('aui-base', function(A){
+		var fileId = A.one('#<portlet:namespace/>fileId').attr('value');
+		var emailColumn = A.one('#<portlet:namespace/>emailColumn').attr('value');
+		var columnsToUse = A.one('#<portlet:namespace/>columnsToUse').attr('value');
+		var content = A.one('#<portlet:namespace/>content').attr('value');
+		var senderEmail = A.one('#<portlet:namespace/>senderEmail').attr('value');
+		var emailSubject = A.one('#<portlet:namespace/>emailSubject').attr('value');
+
+		A.io.request('<%=resourceURL.toString()%>', {
+			method: 'post',
+			data: {
+				<portlet:namespace />action: 'start-send',
+				<portlet:namespace />fileId: fileId,
+				<portlet:namespace />emailColumn: emailColumn,
+				<portlet:namespace />columnsToUse: columnsToUse,
+				<portlet:namespace />content: content,
+				<portlet:namespace />senderEmail: senderEmail,
+				<portlet:namespace />emailSubject: emailSubject
+			},
+			on: {
+			     success: function() {
+			     	var result = this.get('responseData');
+					if (result !== 'success') {
+						alert('Error sending the emails');
+					}
+			    }
+			}
+		});
+	});
+}
+</aui:script>

@@ -13,7 +13,7 @@ import com.liferay.portal.kernel.json.JSONObject;
 
 public class Utils {
 	public static String DEFAULT_COLUMN_NAME = "Column";
-	
+
 	public static String formatColumnName(String columnName) {
 		columnName = columnName.toLowerCase();
 		columnName = columnName.replace(" ", "_");
@@ -104,6 +104,7 @@ public class Utils {
 	}
 	
 	public static String removeUnwantedColumns(String data) {
+		
 		Pattern pattern = Pattern.compile("(\\$\\{)(.*?)(\\})");
 		Matcher matcher = pattern.matcher(data);
 		

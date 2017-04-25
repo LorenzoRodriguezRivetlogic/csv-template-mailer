@@ -1,5 +1,11 @@
 package com.rivetlogic.csvtemplatemailer.portlet;
 
+import com.liferay.mail.kernel.model.MailMessage;
+import com.liferay.petra.mail.MailEngine;
+import com.liferay.petra.mail.MailEngineException;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatus;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusRegistryUtil;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskThreadLocal;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -18,6 +24,7 @@ import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.rivetlogic.csvtemplatemailer.model.Template;
 import com.rivetlogic.csvtemplatemailer.service.TemplateLocalServiceUtil;
+import com.rivetlogic.csvtemplatemailer.task.SendEmailTask;
 import com.rivetlogic.csvtemplatemailer.util.FileColumn;
 import com.rivetlogic.csvtemplatemailer.util.FileUtil;
 import com.rivetlogic.csvtemplatemailer.util.MailUtil;
@@ -27,9 +34,12 @@ import com.rivetlogic.csvtemplatemailer.util.WebKeys;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.Portlet;
@@ -59,12 +69,15 @@ import org.osgi.service.component.annotations.Component;
 		"com.liferay.portlet.header-portlet-javascript=/js/ckeditor/config.js",
         "com.liferay.portlet.header-portlet-javascript=/js/main.js",
 		"javax.portlet.resource-bundle=content.Language",
-		"javax.portlet.security-role-ref=power-user,user"
+		"javax.portlet.security-role-ref=power-user,user",
+		"mail.throws.exception.on.failure=true"
 	},
 	service = Portlet.class
 )
 public class CsvTemplateMailerPortlet extends MVCPortlet {
 	private static final Log LOG = LogFactoryUtil.getLog(CsvTemplateMailerPortlet.class);
+	
+	private SendEmailTask emailTask;
 	
 	public void uploadCsv(ActionRequest request, ActionResponse response) throws PortletException,IOException {
 		
@@ -162,18 +175,6 @@ public class CsvTemplateMailerPortlet extends MVCPortlet {
 	    String content = ParamUtil.getString(request, WebKeys.CONTENT);
 	    String senderEmail = ParamUtil.getString(request, WebKeys.SENDER_EMAIL);
 	    String emailSubject = ParamUtil.getString(request, WebKeys.EMAIL_SUBJECT);
-	    
-	    try {
-		    List<FileColumn> columns = Utils.deserializeColumns(columnsToUse);
-		    FileColumn email = (FileColumn) JSONFactoryUtil.looseDeserialize(emailColumn, FileColumn.class);
-		    
-		    List<Map<String, String>> data = FileUtil.getFileRows(fileId, columns, email);
-	    
-			MailUtil.sendEmails(senderEmail, content, emailSubject, data);
-			FileUtil.deleteFileAndFolder(Long.parseLong(fileId));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	public void serveResource(ResourceRequest resourceRequest, ResourceResponse resourceResponse) 
@@ -195,6 +196,14 @@ public class CsvTemplateMailerPortlet extends MVCPortlet {
 		
 		if (action.equals(WebKeys.ACTION_DELETE)) {
 			deleteAction(resourceRequest, resourceResponse);
+		}
+		
+		if (action.equals(WebKeys.ACTION_START_SEND)) {
+			startSend(resourceRequest, resourceResponse);
+		}
+		
+		if (action.equals(WebKeys.ACTION_STATUS_SEND)) {
+			statusSend(resourceRequest, resourceResponse);
 		}
     }
 	
@@ -294,6 +303,73 @@ public class CsvTemplateMailerPortlet extends MVCPortlet {
 		} catch (PortalException e) {
 			writer.print("error");
 			e.printStackTrace();
+		} catch (SystemException e) {
+			writer.print("error");
+			e.printStackTrace();
+		}
+		
+        writer.flush();
+        writer.close();
+        super.serveResource(resourceRequest, resourceResponse);
+	}
+	
+	private void startSend(ResourceRequest resourceRequest, ResourceResponse resourceResponse) 
+			throws IOException, PortletException {
+		
+		String fileId = ParamUtil.getString(resourceRequest, WebKeys.FILE_ID);
+		String emailColumn = ParamUtil.getString(resourceRequest, WebKeys.COLUMN_EMAIL);
+		String columnsToUse = ParamUtil.getString(resourceRequest, WebKeys.COLUMNS_TO_USE);
+	    String content = ParamUtil.getString(resourceRequest, WebKeys.CONTENT);
+	    String senderEmail = ParamUtil.getString(resourceRequest, WebKeys.SENDER_EMAIL);
+	    String emailSubject = ParamUtil.getString(resourceRequest, WebKeys.EMAIL_SUBJECT);
+	    
+	    List<FileColumn> columns = Utils.deserializeColumns(columnsToUse);
+	    FileColumn email = (FileColumn) JSONFactoryUtil.looseDeserialize(emailColumn, FileColumn.class);
+	    
+	    List<Map<String, String>> data = FileUtil.getFileRows(fileId, columns, email);
+	    
+		emailTask = new SendEmailTask();
+		emailTask.start(data, senderEmail, content, emailSubject, fileId);
+		
+		resourceResponse.setContentType("text/html");
+        PrintWriter writer = resourceResponse.getWriter();
+
+		try {
+			writer.print("success");
+		} catch (SystemException e) {
+			writer.print("error");
+			e.printStackTrace();
+		}
+		
+        writer.flush();
+        writer.close();
+        super.serveResource(resourceRequest, resourceResponse);
+	}
+	
+	private void statusSend(ResourceRequest resourceRequest, ResourceResponse resourceResponse) 
+			throws IOException, PortletException {
+		
+		Map<String, String> data = new HashMap<>();
+		data.put("sent", String.valueOf(0));
+		data.put("notSent", String.valueOf(0));
+		data.put("finished", String.valueOf(false));
+		
+		if(emailTask != null) {
+			data.put("sent", String.valueOf(emailTask.getSent()));
+			data.put("notSent", String.valueOf(emailTask.getNotSent()));
+			
+			if (emailTask.getState() == Thread.State.TERMINATED) {
+				data.put("finished", String.valueOf(true));
+			} else {
+				data.put("finished", String.valueOf(false));
+			}
+		}
+
+        PrintWriter writer = resourceResponse.getWriter();
+        	
+		try {
+			String jsonData = JSONFactoryUtil.looseSerialize(data);
+			writer.print(jsonData);
 		} catch (SystemException e) {
 			writer.print("error");
 			e.printStackTrace();

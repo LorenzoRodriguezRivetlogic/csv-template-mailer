@@ -29,4 +29,6 @@ public interface WebKeys extends com.liferay.portal.kernel.util.WebKeys {
     String ACTION_UPDATE = "update";
     String ACTION_SAVE = "save";
     String ACTION_DELETE = "delete";
+    String ACTION_START_SEND = "start-send";
+    String ACTION_STATUS_SEND = "status-send";
 }
