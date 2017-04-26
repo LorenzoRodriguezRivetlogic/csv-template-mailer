@@ -48,11 +48,8 @@ public class SendEmailTask implements Runnable {
 		    } catch (Exception e1) {
 		    	notSent++;
 				System.out.println("Exception");
-				//e1.printStackTrace();
 			}
 	    }
-	    
-		FileUtil.deleteFileAndFolder(Long.parseLong(fileId));
 	}
 
 	public Thread.State getState() {

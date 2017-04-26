@@ -160,7 +160,8 @@ public class CsvTemplateMailerPortlet extends MVCPortlet {
 	}
 	
 	public void sendEmails(ActionRequest request, ActionResponse response) throws IOException {
-		
+		String fileId = ParamUtil.getString(request, WebKeys.FILE_ID);
+		FileUtil.deleteFileAndFolder(Long.parseLong(fileId));
 	}
 
 	public void serveResource(ResourceRequest resourceRequest, ResourceResponse resourceResponse) 

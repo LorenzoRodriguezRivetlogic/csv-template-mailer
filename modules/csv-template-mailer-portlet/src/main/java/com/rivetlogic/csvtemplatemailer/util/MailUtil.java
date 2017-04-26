@@ -49,6 +49,7 @@ public class MailUtil {
     	    tmpBody = tmpBody.replace(key, value);
     	}
     	
+    	tmpBody = Utils.removeUnwantedColumns(tmpBody);
     	return new MailMessage(from, to, subject, tmpBody, true);
 	}
 }
