@@ -148,6 +148,7 @@ public class FileUtil {
 					column.setName(columnsRaw[i]);
 				} else {
 					column.setName(Utils.DEFAULT_COLUMN_NAME+countCol);
+					countCol++;
 				}
 				
 				
