@@ -1,8 +1,10 @@
 package com.rivetlogic.csvtemplatemailer.util;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -119,5 +121,18 @@ public class Utils {
         }
 		
 		return data;
+	}
+	
+	public static boolean haveRepeatedColumns(List<FileColumn> columns) {
+		
+		Set<String> elements = new HashSet<>();
+		
+		for (FileColumn fileColumn : columns) {
+			if(elements.add(fileColumn.getName()) == false){
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }

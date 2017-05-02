@@ -61,7 +61,22 @@ import org.osgi.service.component.annotations.Component;
         "com.liferay.portlet.header-portlet-javascript=/js/main.js",
 		"javax.portlet.resource-bundle=content.Language",
 		"javax.portlet.security-role-ref=power-user,user",
-		"mail.throws.exception.on.failure=true"
+		"mail.throws.exception.on.failure=true",
+		"theme.css.fast.load=false",
+		"theme.images.fast.load=false",
+		"javascript.fast.load=false",
+		"javascript.barebone.enabled=false",
+		"javascript.log.enabled=false",
+		"layout.template.cache.enabled=false",
+		"combo.check.timestamp=false",
+		"freemarker.engine.cache.storage=soft:1",
+		"freemarker.engine.modification.check.interval=0",
+		"openoffice.cache.enabled=false",
+		"velocity.engine.resource.manager.cache.enabled=false",
+		"com.liferay.portal.servlet.filters.cache.CacheFilter=false",
+		"com.liferay.portal.servlet.filters.themepreview.ThemePreviewFilter=false",
+		"velocity.engine.resource.manager.cache.enabled=false",
+		"minifier.inline.content.cache.size=0"
 	},
 	service = Portlet.class
 )
@@ -116,6 +131,14 @@ public class CsvTemplateMailerPortlet extends MVCPortlet {
 			if (fileColumn.getUse()) {
 				columnsToUse.add(fileColumn);
 			}
+		}
+		
+		if(Utils.haveRepeatedColumns(columnsToUse)) {
+			SessionErrors.add(request, "column-repeated-name");
+			response.setRenderParameter(WebKeys.JSP_PAGE, WebKeys.DATA_MAPPING_URL);
+	        response.setRenderParameter(WebKeys.FILE_ID, String.valueOf(fileId));
+	        sendRedirect(request, response);
+			return;
 		}
 		
 		response.setRenderParameter(WebKeys.JSP_PAGE, WebKeys.EMAIL_CONFIGURATION_URL);

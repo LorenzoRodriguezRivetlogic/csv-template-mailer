@@ -18,6 +18,8 @@
 
 <liferay-ui:header showBackURL="true" backURL="<%= returnUrl.toString() %>"  title="data-mapping" />
 
+<liferay-ui:error key="column-repeated-name" message="column-repeated-name"></liferay-ui:error>
+
 <aui:form action="<%= sendDataURL %>" method="post" name="fm">
 
 	<aui:input name="fileId" type="hidden" value='<%= fileId %>'/>
@@ -37,7 +39,7 @@
 			    <aui:input name="useInHtml" label="" type="checkbox" checked="true" required="true" />
 			</liferay-ui:search-container-column-text>
 			<liferay-ui:search-container-column-text name="contains-email">
-			    <aui:input name="containsEmail" label="" type="radio" value="<%= column.getId() %>" required="true"/>
+			    <aui:input name="containsEmail" label="" type="radio" value="<%= column.getId() %>" checked="<%= column.getId() == 0%>" required="true"/>
 			</liferay-ui:search-container-column-text>
 			
 		</liferay-ui:search-container-row>

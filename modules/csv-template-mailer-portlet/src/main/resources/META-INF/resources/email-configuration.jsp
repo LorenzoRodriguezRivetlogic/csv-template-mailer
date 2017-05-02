@@ -103,8 +103,8 @@
 						<% 
 						for (Template templateSel : templates) {
 						%>
-							<aui:option value="<%= templateSel.getTemplateId() %>"  selected="<%= templateId == templateSel.getTemplateId() %>">
-								<liferay-ui:message key="<%= templateSel.getName() %>" />
+							<aui:option value="<%=templateSel.getTemplateId()%>"  selected="<%= templateId == templateSel.getTemplateId() %>">
+								<liferay-ui:message key="<%=templateSel.getName()%>" />
 							</aui:option>
 						<% 
 						}
@@ -180,28 +180,45 @@ function callSaveResource(){
 			return;
 		}
 		
-		A.io.request('<%=resourceURL.toString()%>', {
-			method: 'post',
-			data: {
-				<portlet:namespace />action: 'save',
-				<portlet:namespace />name: name,
-				<portlet:namespace />template: template
-			},
-			on: {
-			     success: function() {
-			     	var result = this.get('responseData');
-			    	if (result === 'error') {
-			    		alert('Error save the template save');
-					} else {
-						var select = A.one('#<portlet:namespace/>templates');
-			    		var option  = A.Node.create( '<option value=\"'+result+'\">'+name+'</option>');
-			    		select.append(option);
-						
-						alert('Template saved');
-					}
-			     }
+		var count = 0;
+		var repeated = false;
+		var select = A.one('#<portlet:namespace/>templates');
+		var selectElement = select.outerHTML();
+		var htmlObject = $(selectElement);
+		
+		while(count < htmlObject[0].options.length) {
+			if(htmlObject[0].options[count].text == name){
+				alert('Cannot save repeated template name');
+				repeated = true;
+				break;
 			}
-		});
+			count = count + 1;
+		}
+		
+		if(repeated == false) {
+			A.io.request('<%=resourceURL.toString()%>', {
+				method: 'post',
+				data: {
+					<portlet:namespace />action: 'save',
+					<portlet:namespace />name: name,
+					<portlet:namespace />template: template
+				},
+				on: {
+				     success: function() {
+				     	var result = this.get('responseData');
+				    	if (result === 'error') {
+				    		alert('Error save the template save');
+						} else {
+							var select = A.one('#<portlet:namespace/>templates');
+				    		var option  = A.Node.create( '<option value=\"'+result+'\">'+name+'</option>');
+				    		select.append(option);
+							
+							alert('Template saved');
+						}
+				     }
+				}
+			});
+		}
     });
 }
 function callUpdateResource(){
