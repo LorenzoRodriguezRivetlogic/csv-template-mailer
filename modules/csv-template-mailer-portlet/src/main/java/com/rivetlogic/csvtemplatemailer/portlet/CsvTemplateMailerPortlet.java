@@ -121,7 +121,7 @@ public class CsvTemplateMailerPortlet extends MVCPortlet {
 		FileColumn columnEmail = new FileColumn();
 		
 		for (FileColumn fileColumn : columns) {
-			fileColumn.setUse(Utils.checkboxValueConvert(uses[fileColumn.getId()]));
+			fileColumn.setUse(Utils.valueIsInArray(uses, String.valueOf(fileColumn.getId())));
 			
 			if (fileColumn.getId() == containsEmail) {
 				fileColumn.setIsEmail(true);

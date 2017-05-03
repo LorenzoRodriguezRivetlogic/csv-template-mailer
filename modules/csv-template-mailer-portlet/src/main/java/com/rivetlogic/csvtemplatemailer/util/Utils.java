@@ -59,11 +59,12 @@ public class Utils {
 		return arg;
 	}
 	
-	public static boolean checkboxValueConvert(String value) {
-		if (value.equals("on")) {
-			return true;
+	public static boolean valueIsInArray(String[] values, String value) {
+		for (String string : values) {
+			if(value.equals(string)){
+				return true;
+			}
 		}
-		
 		return false;
 	}
 	

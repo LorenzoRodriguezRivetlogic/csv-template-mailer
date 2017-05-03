@@ -36,7 +36,7 @@
 			
 			<liferay-ui:search-container-column-text property="name" name="name-csv" />
             <liferay-ui:search-container-column-text name="use-html">
-			    <aui:input name="useInHtml" label="" type="checkbox" checked="true" required="true" />
+			    <aui:input name="useInHtml" label="" type="checkbox"  value="<%= column.getId() %>" checked="true" required="true" />
 			</liferay-ui:search-container-column-text>
 			<liferay-ui:search-container-column-text name="contains-email">
 			    <aui:input name="containsEmail" label="" type="radio" value="<%= column.getId() %>" checked="<%= column.getId() == 0%>" required="true"/>
