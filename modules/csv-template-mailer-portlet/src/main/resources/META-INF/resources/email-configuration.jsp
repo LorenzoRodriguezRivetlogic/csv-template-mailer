@@ -149,21 +149,32 @@ function callServeResource(){
 			return;
 		}
 		
-        A.io.request('<%=resourceURL.toString()%>', {
-			method: 'post',
-			data: {
-				<portlet:namespace />action: 'load',
-				<portlet:namespace />templateId: template
-			},
-			on: {
-			     success: function() {
-			    	var label = A.one('#<portlet:namespace/>templates option:selected').attr('text');
-					document.getElementById('<portlet:namespace />name').value = label;
-					document.getElementById('<portlet:namespace />templateId').value = template;
-			     	CKEDITOR.instances.editor1.setData(this.get('responseData'));
-			     }
-			}
-		});
+		var name = A.one('#<portlet:namespace/>name').attr('value');
+		var repeated = false;
+
+		var currTemplate = document.getElementById('<portlet:namespace />templateId').value;
+		if(!(name.length === 0) && currTemplate == template){
+			alert('Template already loaded');
+			repeated = true;
+		}
+		
+		if(repeated == false) {
+			A.io.request('<%=resourceURL.toString()%>', {
+				method: 'post',
+				data: {
+					<portlet:namespace />action: 'load',
+					<portlet:namespace />templateId: template
+				},
+				on: {
+				     success: function() {
+				    	var label = A.one('#<portlet:namespace/>templates option:selected').attr('text');
+						document.getElementById('<portlet:namespace />name').value = label;
+						document.getElementById('<portlet:namespace />templateId').value = template;
+				     	CKEDITOR.instances.editor1.setData(this.get('responseData'));
+				     }
+				}
+			});
+		}
     });
 }
 function callSaveResource(){
@@ -187,7 +198,7 @@ function callSaveResource(){
 		var htmlObject = $(selectElement);
 		
 		while(count < htmlObject[0].options.length) {
-			if(htmlObject[0].options[count].text == name){
+			if(htmlObject[0].options[count].text == $.trim(name)){
 				alert('Cannot save repeated template name');
 				repeated = true;
 				break;
